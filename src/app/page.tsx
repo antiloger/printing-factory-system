@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
+import { OffsetJobForm } from "@/components/default/offset-job-form"
 import { JobsTable } from "@/components/default/jobs-table"
 import { ShiftTracker } from "@/components/default/shift-tracker"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SHIFT_DURATION, SETUP_TIME } from "@/lib/constants"
-import { OffsetJobForm } from "@/components/default/offset-job-form"
 
 export interface Job {
   id: string

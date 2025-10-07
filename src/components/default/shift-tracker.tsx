@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { AlertCircle, CheckCircle2, Clock, Trash2 } from "lucide-react"
 import {
   AlertDialog,
@@ -134,13 +133,6 @@ export function ShiftTracker({
             <span className="font-medium text-foreground">Shift Utilization</span>
             <span className="font-mono font-semibold text-foreground">{utilizationPercentage.toFixed(1)}%</span>
           </div>
-          <Progress
-            value={Math.min(utilizationPercentage, 100)}
-            className="h-3"
-            indicatorClassName={
-              isOverCapacity ? "bg-destructive" : utilizationPercentage > 90 ? "bg-warning" : "bg-success"
-            }
-          />
           {isOverCapacity && (
             <p className="mt-2 text-sm text-destructive">
               ⚠️ Shift is over capacity by {Math.abs(remainingShiftTime).toFixed(1)} minutes
