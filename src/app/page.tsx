@@ -1,103 +1,94 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { useState } from "react"
+import { JobsTable } from "@/components/default/jobs-table"
+import { ShiftTracker } from "@/components/default/shift-tracker"
+import { Card } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { SHIFT_DURATION, SETUP_TIME } from "@/lib/constants"
+import { OffsetJobForm } from "@/components/default/offset-job-form"
+
+export interface Job {
+  id: string
+  name: string
+  plateSetupTime: number
+  varnishBlanketTime: number
+  colorWashTime: number
+  productionTime: number
+  totalMR: number
+  totalJobTime: number
+}
+
+export default function PrintingFactoryPage() {
+  const [jobs, setJobs] = useState<Job[]>([])
+
+  const totalJobsTime = jobs.reduce((sum, job) => sum + job.totalJobTime, 0)
+  const remainingShiftTime = SHIFT_DURATION - SETUP_TIME - totalJobsTime
+
+  const handleAddJob = (job: Omit<Job, "id">) => {
+    const newJob = {
+      ...job,
+      id: `job-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    }
+    setJobs([...jobs, newJob])
+  }
+
+  const handleRemoveJob = (id: string) => {
+    setJobs(jobs.filter((job) => job.id !== id))
+  }
+
+  const handleEditJob = (id: string, updatedJob: Omit<Job, "id">) => {
+    setJobs(jobs.map((job) => (job.id === id ? { ...updatedJob, id } : job)))
+  }
+
+  const handleClearShift = () => {
+    setJobs([])
+  }
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border bg-card">
+        <div className="container mx-auto px-4 py-6">
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">Printing Factory Time Planning</h1>
+          <p className="mt-2 text-muted-foreground">Manage job scheduling and shift routing for production workflows</p>
         </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8">
+        <Tabs defaultValue="offset" className="space-y-6">
+          <TabsList className="grid w-full max-w-md grid-cols-3">
+            <TabsTrigger value="offset">Off-set</TabsTrigger>
+            <TabsTrigger value="die-cut" disabled>
+              Die-cut
+            </TabsTrigger>
+            <TabsTrigger value="pasting" disabled>
+              Pasting
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="offset" className="space-y-6">
+            <ShiftTracker
+              totalJobsTime={totalJobsTime}
+              remainingShiftTime={remainingShiftTime}
+              setupTime={SETUP_TIME}
+              shiftDuration={SHIFT_DURATION}
+              jobCount={jobs.length}
+              onClearShift={handleClearShift}
+            />
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card className="p-6">
+                <h2 className="mb-6 text-2xl font-semibold text-foreground">Create New Job</h2>
+                <OffsetJobForm onAddJob={handleAddJob} remainingShiftTime={remainingShiftTime} />
+              </Card>
+
+              <div className="space-y-6">
+                <JobsTable jobs={jobs} onRemoveJob={handleRemoveJob} onEditJob={handleEditJob} />
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
-  );
+  )
 }
