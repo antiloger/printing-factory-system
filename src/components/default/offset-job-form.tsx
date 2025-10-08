@@ -6,15 +6,15 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, Plus, RotateCcw } from "lucide-react"
 import type { Job } from "@/app/page"
 import {
-  SHEET_RANGES,
   COLOR_WASH_TYPES,
   PLATE_SETUP_TIME_PER_PLATE,
   VARNISH_BLANKET_TIME_PER_BLANKET,
+  getSheetRangeByCount,
 } from "@/lib/constants"
 
 interface OffsetJobFormProps {
@@ -28,34 +28,32 @@ export function OffsetJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
   const [jobName, setJobName] = useState("")
   const [numPlates, setNumPlates] = useState("")
   const [numBlankets, setNumBlankets] = useState("")
-  const [colorWashType, setColorWashType] = useState("")
-  const [colorWashPlates, setColorWashPlates] = useState("")
-  const [sheetRange, setSheetRange] = useState("")
+  const [selectedColorWash, setSelectedColorWash] = useState<string[]>([])
   const [exactSheetCount, setExactSheetCount] = useState("")
   const [warning, setWarning] = useState("")
 
   const plateSetupTime = Number(numPlates) * PLATE_SETUP_TIME_PER_PLATE || 0
   const varnishBlanketTime = Number(numBlankets) * VARNISH_BLANKET_TIME_PER_BLANKET || 0
 
-  const colorWashMultiplier = COLOR_WASH_TYPES.find((t) => t.value === colorWashType)?.multiplier || 0
-  const colorWashTime = Number(colorWashPlates) * colorWashMultiplier || 0
+  const colorWashTime = selectedColorWash.reduce((total, washType) => {
+    const multiplier = COLOR_WASH_TYPES.find((t) => t.value === washType)?.multiplier || 0
+    return total + 1 * multiplier
+  }, 0)
 
   const totalMR = plateSetupTime + varnishBlanketTime + colorWashTime
 
-  const sheetSpeed = SHEET_RANGES.find((r) => r.value === sheetRange)?.speed || 0
+  const detectedRange = getSheetRangeByCount(Number(exactSheetCount))
+  const sheetSpeed = detectedRange?.speed || 0
   const productionTime = sheetSpeed > 0 ? Number(exactSheetCount) / sheetSpeed : 0
 
   const totalJobTime = totalMR + productionTime
 
-  // Load editing job data
   useEffect(() => {
     if (editingJob) {
       setJobName(editingJob.name)
       setNumPlates(String(editingJob.plateSetupTime / PLATE_SETUP_TIME_PER_PLATE))
       setNumBlankets(String(editingJob.varnishBlanketTime / VARNISH_BLANKET_TIME_PER_BLANKET))
-      // For color wash, we need to determine which type was used
-      const colorWashPlatesCalc = editingJob.colorWashTime
-      setColorWashPlates(String(colorWashPlatesCalc))
+      setSelectedColorWash([])
     }
   }, [editingJob])
 
@@ -73,11 +71,15 @@ export function OffsetJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
     setJobName("")
     setNumPlates("")
     setNumBlankets("")
-    setColorWashType("")
-    setColorWashPlates("")
-    setSheetRange("")
+    setSelectedColorWash([])
     setExactSheetCount("")
     setWarning("")
+  }
+
+  const handleColorWashToggle = (washValue: string) => {
+    setSelectedColorWash((prev) =>
+      prev.includes(washValue) ? prev.filter((v) => v !== washValue) : [...prev, washValue],
+    )
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -104,7 +106,6 @@ export function OffsetJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
 
     onAddJob(job)
 
-    // Reset form
     handleClearForm()
 
     if (onCancelEdit) {
@@ -158,38 +159,32 @@ export function OffsetJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
           </p>
         </div>
 
-        <div className="space-y-2 w-full">
-          <Label htmlFor="colorWashType">Color Wash Type</Label>
-          <Select value={colorWashType} onValueChange={setColorWashType}>
-            <SelectTrigger id="colorWashType" className="w-full">
-              <SelectValue placeholder="Select wash type" />
-            </SelectTrigger>
-            <SelectContent>
-              {COLOR_WASH_TYPES.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {colorWashType && (
+        <div className="space-y-3">
+          <Label>Color Wash Type</Label>
           <div className="space-y-2">
-            <Label htmlFor="colorWashPlates">Number of Plates (Color Wash)</Label>
-            <Input
-              id="colorWashPlates"
-              type="number"
-              min="0"
-              value={colorWashPlates}
-              onChange={(e) => setColorWashPlates(e.target.value)}
-              placeholder="0"
-            />
-            <p className="text-sm text-muted-foreground">
-              Time: {colorWashTime.toFixed(1)} minutes (× {colorWashMultiplier} min/plate)
-            </p>
+            {COLOR_WASH_TYPES.map((type) => (
+              <div key={type.value} className="flex items-center space-x-2">
+                <Checkbox
+                  id={type.value}
+                  checked={selectedColorWash.includes(type.value)}
+                  onCheckedChange={() => handleColorWashToggle(type.value)}
+                />
+                <label
+                  htmlFor={type.value}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {type.label} ({type.multiplier} min)
+                </label>
+              </div>
+            ))}
           </div>
-        )}
+          {selectedColorWash.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              Time: {colorWashTime.toFixed(1)} minutes (
+              {selectedColorWash.map((v) => COLOR_WASH_TYPES.find((t) => t.value === v)?.label).join(" + ")})
+            </p>
+          )}
+        </div>
 
         <div className="rounded-md bg-accent/10 p-3">
           <p className="text-sm font-medium text-foreground">
@@ -201,38 +196,25 @@ export function OffsetJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
       <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
         <h3 className="font-semibold text-foreground">Production Run Time</h3>
 
-        <div className="space-y-2 w-full" >
-          <Label htmlFor="sheetRange">Sheet Range</Label>
-          <Select value={sheetRange} onValueChange={setSheetRange}>
-            <SelectTrigger id="sheetRange" className="w-full">
-              <SelectValue placeholder="Select sheet range" />
-            </SelectTrigger>
-            <SelectContent>
-              {SHEET_RANGES.map((range) => (
-                <SelectItem key={range.value} value={range.value}>
-                  {range.label} ({range.speed} sheets/min)
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="space-y-2">
+          <Label htmlFor="exactSheetCount">Sheet Count</Label>
+          <Input
+            id="exactSheetCount"
+            type="number"
+            min="0"
+            value={exactSheetCount}
+            onChange={(e) => setExactSheetCount(e.target.value)}
+            placeholder="Enter number of sheets"
+          />
+          {detectedRange && Number(exactSheetCount) > 0 && (
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">
+                Range: {detectedRange.label} ({detectedRange.speed} sheets/min)
+              </p>
+              <p className="text-sm text-muted-foreground">Time: {productionTime.toFixed(1)} minutes</p>
+            </div>
+          )}
         </div>
-
-        {sheetRange && (
-          <div className="space-y-2">
-            <Label htmlFor="exactSheetCount">Exact Sheet Count</Label>
-            <Input
-              id="exactSheetCount"
-              type="number"
-              min="0"
-              value={exactSheetCount}
-              onChange={(e) => setExactSheetCount(e.target.value)}
-              placeholder="0"
-            />
-            <p className="text-sm text-muted-foreground">
-              Time: {productionTime.toFixed(1)} minutes (÷ {sheetSpeed} sheets/min)
-            </p>
-          </div>
-        )}
       </div>
 
       <div className="rounded-md bg-primary/10 p-4">
