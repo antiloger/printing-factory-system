@@ -50,7 +50,10 @@ export default function PrintingFactoryPage() {
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-6">
           <h1 className="text-4xl font-bold tracking-tight text-foreground">Printing Factory Time Planning</h1>
-          <p className="mt-2 text-muted-foreground">Manage job scheduling and shift routing for production workflows</p>
+          <p className="mt-2 font-bold text-muted-foreground">
+            Shiwanka Edirisinghe
+          </p>
+          <p className="text-muted-foreground">Manage job scheduling and shift routing for production workflows</p>
         </div>
       </header>
 

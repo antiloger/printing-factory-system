@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, Plus, RotateCcw } from "lucide-react"
 import type { Job } from "@/app/page"
@@ -27,18 +28,17 @@ interface OffsetJobFormProps {
 export function OffsetJobForm({ onAddJob, remainingShiftTime, editingJob, onCancelEdit }: OffsetJobFormProps) {
   const [jobName, setJobName] = useState("")
   const [numPlates, setNumPlates] = useState("")
-  const [numBlankets, setNumBlankets] = useState("")
-  const [selectedColorWash, setSelectedColorWash] = useState<string[]>([])
+  const [hasVarnishBlanket, setHasVarnishBlanket] = useState(false)
+  const [selectedColorWash, setSelectedColorWash] = useState<string>("")
   const [exactSheetCount, setExactSheetCount] = useState("")
   const [warning, setWarning] = useState("")
 
   const plateSetupTime = Number(numPlates) * PLATE_SETUP_TIME_PER_PLATE || 0
-  const varnishBlanketTime = Number(numBlankets) * VARNISH_BLANKET_TIME_PER_BLANKET || 0
+  const varnishBlanketTime = hasVarnishBlanket ? 1 * VARNISH_BLANKET_TIME_PER_BLANKET : 0
 
-  const colorWashTime = selectedColorWash.reduce((total, washType) => {
-    const multiplier = COLOR_WASH_TYPES.find((t) => t.value === washType)?.multiplier || 0
-    return total + 1 * multiplier
-  }, 0)
+  const colorWashTime = selectedColorWash
+    ? COLOR_WASH_TYPES.find((t) => t.value === selectedColorWash)?.multiplier || 0
+    : 0
 
   const totalMR = plateSetupTime + varnishBlanketTime + colorWashTime
 
@@ -52,8 +52,8 @@ export function OffsetJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
     if (editingJob) {
       setJobName(editingJob.name)
       setNumPlates(String(editingJob.plateSetupTime / PLATE_SETUP_TIME_PER_PLATE))
-      setNumBlankets(String(editingJob.varnishBlanketTime / VARNISH_BLANKET_TIME_PER_BLANKET))
-      setSelectedColorWash([])
+      setHasVarnishBlanket(editingJob.varnishBlanketTime > 0)
+      setSelectedColorWash("")
     }
   }, [editingJob])
 
@@ -70,16 +70,10 @@ export function OffsetJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
   const handleClearForm = () => {
     setJobName("")
     setNumPlates("")
-    setNumBlankets("")
-    setSelectedColorWash([])
+    setHasVarnishBlanket(false)
+    setSelectedColorWash("")
     setExactSheetCount("")
     setWarning("")
-  }
-
-  const handleColorWashToggle = (washValue: string) => {
-    setSelectedColorWash((prev) =>
-      prev.includes(washValue) ? prev.filter((v) => v !== washValue) : [...prev, washValue],
-    )
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -145,50 +139,53 @@ export function OffsetJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="numBlankets">Number of Blankets (Varnish)</Label>
-          <Input
-            id="numBlankets"
-            type="number"
-            min="0"
-            value={numBlankets}
-            onChange={(e) => setNumBlankets(e.target.value)}
-            placeholder="0"
-          />
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="hasVarnishBlanket"
+              checked={hasVarnishBlanket}
+              onCheckedChange={(checked) => setHasVarnishBlanket(checked === true)}
+            />
+            <label
+              htmlFor="hasVarnishBlanket"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Varnish Blanket MR
+            </label>
+          </div>
           <p className="text-sm text-muted-foreground">
-            Time: {varnishBlanketTime.toFixed(1)} minutes (× {VARNISH_BLANKET_TIME_PER_BLANKET} min/blanket)
+            Time: {varnishBlanketTime.toFixed(1)} minutes{" "}
+            {hasVarnishBlanket && `(1 × ${VARNISH_BLANKET_TIME_PER_BLANKET} min)`}
           </p>
         </div>
 
         <div className="space-y-3">
-          <Label>Color Wash Type</Label>
-          <div className="space-y-2">
-            {COLOR_WASH_TYPES.map((type) => (
-              <div key={type.value} className="flex items-center space-x-2">
-                <Checkbox
-                  id={type.value}
-                  checked={selectedColorWash.includes(type.value)}
-                  onCheckedChange={() => handleColorWashToggle(type.value)}
-                />
-                <label
-                  htmlFor={type.value}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {type.label} ({type.multiplier} min)
-                </label>
-              </div>
-            ))}
-          </div>
-          {selectedColorWash.length > 0 && (
+          <Label>Color Wash Type (Select One)</Label>
+          <RadioGroup value={selectedColorWash} onValueChange={setSelectedColorWash}>
+            <div className="space-y-2">
+              {COLOR_WASH_TYPES.map((type) => (
+                <div key={type.value} className="flex items-center space-x-2">
+                  <RadioGroupItem value={type.value} id={type.value} />
+                  <label
+                    htmlFor={type.value}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {type.label} ({type.multiplier} min)
+                  </label>
+                </div>
+              ))}
+            </div>
+          </RadioGroup>
+          {selectedColorWash && (
             <p className="text-sm text-muted-foreground">
               Time: {colorWashTime.toFixed(1)} minutes (
-              {selectedColorWash.map((v) => COLOR_WASH_TYPES.find((t) => t.value === v)?.label).join(" + ")})
+              {COLOR_WASH_TYPES.find((t) => t.value === selectedColorWash)?.label})
             </p>
           )}
         </div>
 
         <div className="rounded-md bg-accent/10 p-3">
           <p className="text-sm font-medium text-foreground">
-            Total MR Time: <span className="text-lg font-bold text-accent">{totalMR.toFixed(1)}</span> minutes
+            Total MR Time: <span className="text-lg font-bold ">{totalMR.toFixed(1)}</span> minutes
           </p>
         </div>
       </div>

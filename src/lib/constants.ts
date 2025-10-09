@@ -10,7 +10,7 @@ export const VARNISH_BLANKET_TIME_PER_BLANKET = 15 // minutes per blanket
 
 // Color Wash Configuration
 export const COLOR_WASH_TYPES = [
-  { label: "1 unit", value: "1-unit", multiplier: 8 },
+  { label: "1 unit", value: "1-unit", multiplier: 10 },
   { label: "1-3 unit", value: "1-3-unit", multiplier: 15 },
   { label: "1-6 unit", value: "1-6-unit", multiplier: 30 },
 ] as const
