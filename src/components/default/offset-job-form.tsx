@@ -96,6 +96,7 @@ export function OffsetJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
       productionTime,
       totalMR,
       totalJobTime,
+      sheetCount: Number(exactSheetCount) || 0, // Include sheet count in job data
     }
 
     onAddJob(job)
@@ -149,7 +150,7 @@ export function OffsetJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
               htmlFor="hasVarnishBlanket"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              Varnish Blanket MR
+              Varnish Blanket Fix
             </label>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -185,7 +186,7 @@ export function OffsetJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
 
         <div className="rounded-md bg-accent/10 p-3">
           <p className="text-sm font-medium text-foreground">
-            Total MR Time: <span className="text-lg font-bold ">{totalMR.toFixed(1)}</span> minutes
+            Total MR Time: <span className="text-lg font-bold text-foreground">{totalMR.toFixed(1)}</span> minutes
           </p>
         </div>
       </div>

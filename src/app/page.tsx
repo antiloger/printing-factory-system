@@ -17,12 +17,14 @@ export interface Job {
   productionTime: number
   totalMR: number
   totalJobTime: number
+  sheetCount: number
 }
 
 export default function PrintingFactoryPage() {
   const [jobs, setJobs] = useState<Job[]>([])
 
   const totalJobsTime = jobs.reduce((sum, job) => sum + job.totalJobTime, 0)
+  const totalSheetCount = jobs.reduce((sum, job) => sum + job.sheetCount, 0)
   const remainingShiftTime = SHIFT_DURATION - SETUP_TIME - totalJobsTime
 
   const handleAddJob = (job: Omit<Job, "id">) => {
@@ -76,6 +78,7 @@ export default function PrintingFactoryPage() {
               setupTime={SETUP_TIME}
               shiftDuration={SHIFT_DURATION}
               jobCount={jobs.length}
+              totalSheetCount={totalSheetCount} // Pass total sheet count to tracker
               onClearShift={handleClearShift}
             />
 

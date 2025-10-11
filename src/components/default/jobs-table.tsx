@@ -26,6 +26,7 @@ export function JobsTable({ jobs, onRemoveJob }: JobsTableProps) {
   }
 
   const totalTime = jobs.reduce((sum, job) => sum + job.totalJobTime, 0)
+  const totalSheets = jobs.reduce((sum, job) => sum + job.sheetCount, 0)
 
   return (
     <Card className="overflow-hidden">
@@ -37,6 +38,7 @@ export function JobsTable({ jobs, onRemoveJob }: JobsTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Job Name</TableHead>
+              <TableHead className="text-right">Sheet Count</TableHead>
               <TableHead className="text-right">MR Time</TableHead>
               <TableHead className="text-right">Production</TableHead>
               <TableHead className="text-right">Total Time</TableHead>
@@ -47,6 +49,7 @@ export function JobsTable({ jobs, onRemoveJob }: JobsTableProps) {
             {jobs.map((job) => (
               <TableRow key={job.id}>
                 <TableCell className="font-medium">{job.name}</TableCell>
+                <TableCell className="text-right font-mono">{job.sheetCount.toLocaleString()}</TableCell>
                 <TableCell className="text-right font-mono">{job.totalMR.toFixed(1)} min</TableCell>
                 <TableCell className="text-right font-mono">{job.productionTime.toFixed(1)} min</TableCell>
                 <TableCell className="text-right font-mono font-semibold">{job.totalJobTime.toFixed(1)} min</TableCell>
@@ -67,8 +70,16 @@ export function JobsTable({ jobs, onRemoveJob }: JobsTableProps) {
       </div>
       <div className="border-t border-border bg-muted/30 p-4">
         <div className="flex items-center justify-between">
-          <span className="font-semibold text-foreground">Total Jobs Time:</span>
-          <span className="text-xl font-bold text-primary">{totalTime.toFixed(1)} min</span>
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-foreground">Total Sheets:</span>
+              <span className="ml-4 text-lg font-bold text-foreground">{totalSheets.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-foreground">Total Jobs Time:</span>
+              <span className="ml-4 text-xl font-bold text-primary">{totalTime.toFixed(1)} min</span>
+            </div>
+          </div>
         </div>
       </div>
     </Card>

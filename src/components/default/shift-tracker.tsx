@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { AlertCircle, CheckCircle2, Clock, Trash2 } from "lucide-react"
+import { AlertCircle, CheckCircle2, Clock, Trash2, FileText } from "lucide-react" // Added FileText icon
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +21,7 @@ interface ShiftTrackerProps {
   setupTime: number
   shiftDuration: number
   jobCount: number
+  totalSheetCount: number // Added totalSheetCount prop
   onClearShift: () => void
 }
 
@@ -30,6 +31,7 @@ export function ShiftTracker({
   setupTime,
   shiftDuration,
   jobCount,
+  totalSheetCount, // Destructure totalSheetCount
   onClearShift,
 }: ShiftTrackerProps) {
   const usedTime = setupTime + totalJobsTime
@@ -38,7 +40,7 @@ export function ShiftTracker({
 
   return (
     <Card className="overflow-hidden">
-      <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-6">
+      <div className="bg-accent p-6">
         <div className="mb-6 flex items-start justify-between">
           <div>
             <h2 className="text-2xl font-bold text-foreground">Shift Time Tracker</h2>
@@ -68,7 +70,9 @@ export function ShiftTracker({
           )}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {" "}
+          {/* Changed to 5 columns */}
           <div className="rounded-lg bg-card p-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
@@ -77,7 +81,6 @@ export function ShiftTracker({
             <p className="mt-2 text-2xl font-bold text-foreground">{setupTime} min</p>
             <p className="text-xs text-muted-foreground">Constant per shift</p>
           </div>
-
           <div className="rounded-lg bg-card p-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
@@ -88,7 +91,6 @@ export function ShiftTracker({
               {jobCount} job{jobCount !== 1 ? "s" : ""} scheduled
             </p>
           </div>
-
           <div className="rounded-lg bg-card p-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
@@ -97,7 +99,16 @@ export function ShiftTracker({
             <p className="mt-2 text-2xl font-bold text-foreground">{usedTime.toFixed(1)} min</p>
             <p className="text-xs text-muted-foreground">{utilizationPercentage.toFixed(1)}% utilized</p>
           </div>
-
+          <div className="rounded-lg bg-card p-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <FileText className="h-4 w-4" />
+              Total Sheets
+            </div>
+            <p className="mt-2 text-2xl font-bold text-foreground">{totalSheetCount.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">
+              {jobCount} job{jobCount !== 1 ? "s" : ""}
+            </p>
+          </div>
           <div
             className={`rounded-lg p-4 ${isOverCapacity ? "bg-destructive/10" : remainingShiftTime < 60 ? "bg-warning/10" : "bg-success/10"
               }`}
