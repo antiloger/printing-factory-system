@@ -30,8 +30,12 @@ export function JobsTable({ jobs, onRemoveJob }: JobsTableProps) {
 
   return (
     <Card className="overflow-hidden">
-      <div className="bg-muted/50 p-4">
-        <h2 className="text-xl font-semibold text-foreground">Scheduled Jobs ({jobs.length})</h2>
+      <div className="bg-muted/50 p-4 flex felx-row items-center justify-between">
+        <h2 className="text-xl font-semibold text-foreground">Scheduled Jobs: {jobs.length}</h2>
+        <div className="flex items-center justify-between">
+          <span className="font-semibold text-foreground">Total Sheets:</span>
+          <span className="ml-4 text-lg font-bold text-foreground">{totalSheets.toLocaleString()}</span>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <Table>
@@ -71,10 +75,6 @@ export function JobsTable({ jobs, onRemoveJob }: JobsTableProps) {
       <div className="border-t border-border bg-muted/30 p-4">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-foreground">Total Sheets:</span>
-              <span className="ml-4 text-lg font-bold text-foreground">{totalSheets.toLocaleString()}</span>
-            </div>
             <div className="flex items-center justify-between">
               <span className="font-semibold text-foreground">Total Jobs Time:</span>
               <span className="ml-4 text-xl font-bold text-primary">{totalTime.toFixed(1)} min</span>
