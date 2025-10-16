@@ -38,6 +38,9 @@ export const DIECUT_EMBOSS_TIME_PER_UP = 4 // minutes per up
 // Die-cut Repeated MR Configuration
 export const DIECUT_REPEATED_MR_TIME = 30 // minutes
 
+// Die-cut MR Sheets Configuration
+export const DIECUT_MR_SHEETS_TIME = 15 // minutes
+
 // Die-cut Striping Configuration
 export const DIECUT_STRIPING_RANGES = [
   { min: 1, max: 40, multiplier: 1.5 },

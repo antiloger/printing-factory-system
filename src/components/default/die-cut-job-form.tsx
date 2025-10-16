@@ -15,6 +15,7 @@ import {
   getDiecutRunLengthRange,
   DIECUT_EMBOSS_TIME_PER_UP,
   DIECUT_REPEATED_MR_TIME,
+  DIECUT_MR_SHEETS_TIME, // Added MR Sheets constant
 } from "@/lib/constants"
 
 interface DieCutJobFormProps {
@@ -38,6 +39,9 @@ export function DieCutJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
   // Field 3: Repeated MR
   const [hasRepeatedMR, setHasRepeatedMR] = useState(false)
 
+  // Field 3.5: MR Sheets
+  const [hasMRSheets, setHasMRSheets] = useState(false)
+
   // Field 4: Striping
   const [stripingCount, setStripingCount] = useState("")
 
@@ -50,9 +54,10 @@ export function DieCutJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
   const newMRTime = hasNewMR && newMRUps ? calculateDiecutNewMR(Number(newMRUps)) : 0
   const embossTime = hasEmboss && embossUps ? Number(embossUps) * DIECUT_EMBOSS_TIME_PER_UP : 0
   const repeatedMRTime = hasRepeatedMR ? DIECUT_REPEATED_MR_TIME : 0
+  const mrSheetsTime = hasMRSheets ? DIECUT_MR_SHEETS_TIME : 0 // Added MR Sheets time calculation
   const stripingTime = stripingCount ? calculateDiecutStriping(Number(stripingCount)) : 0
 
-  const totalMR = newMRTime + embossTime + repeatedMRTime + stripingTime
+  const totalMR = newMRTime + embossTime + repeatedMRTime + mrSheetsTime + stripingTime // Added mrSheetsTime to total
 
   // Calculate production time
   const detectedRange = getDiecutRunLengthRange(Number(runLength))
@@ -70,6 +75,7 @@ export function DieCutJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
       setHasEmboss(false)
       setEmbossUps("")
       setHasRepeatedMR(false)
+      setHasMRSheets(false) // Added MR Sheets to reset
       setStripingCount("")
       setRunLength(String(editingJob.sheetCount))
     }
@@ -92,6 +98,7 @@ export function DieCutJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
     setHasEmboss(false)
     setEmbossUps("")
     setHasRepeatedMR(false)
+    setHasMRSheets(false) // Added MR Sheets to clear form
     setStripingCount("")
     setRunLength("")
     setWarning("")
@@ -233,6 +240,26 @@ export function DieCutJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
           </p>
         </div>
 
+        {/* Field 3.5: MR Sheets */}
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="hasMRSheets"
+              checked={hasMRSheets}
+              onCheckedChange={(checked) => setHasMRSheets(checked === true)}
+            />
+            <label
+              htmlFor="hasMRSheets"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              MR Sheets
+            </label>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Time: {mrSheetsTime.toFixed(1)} minutes {hasMRSheets && `(${DIECUT_MR_SHEETS_TIME} min)`}
+          </p>
+        </div>
+
         {/* Field 4: Striping */}
         <div className="space-y-2">
           <Label htmlFor="stripingCount">Striping</Label>
@@ -258,7 +285,7 @@ export function DieCutJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
 
         <div className="rounded-md bg-accent/10 p-3">
           <p className="text-sm font-medium text-foreground">
-            Total MR Time: <span className="text-lg font-bold ">{totalMR.toFixed(1)}</span> minutes
+            Total MR Time: <span className="text-lg font-bold text-accent">{totalMR.toFixed(1)}</span> minutes
           </p>
         </div>
       </div>
