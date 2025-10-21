@@ -10,9 +10,10 @@ interface JobsTableProps {
   jobs: Job[]
   onRemoveJob: (id: string) => void
   onEditJob: (id: string, job: Omit<Job, "id">) => void
+  isPasting?: boolean
 }
 
-export function JobsTable({ jobs, onRemoveJob }: JobsTableProps) {
+export function JobsTable({ jobs, onRemoveJob, isPasting = false }: JobsTableProps) {
   if (jobs.length === 0) {
     return (
       <Card className="p-8">
@@ -26,15 +27,15 @@ export function JobsTable({ jobs, onRemoveJob }: JobsTableProps) {
   }
 
   const totalTime = jobs.reduce((sum, job) => sum + job.totalJobTime, 0)
-  const totalSheets = jobs.reduce((sum, job) => sum + job.sheetCount, 0)
+  const totalQuantity = jobs.reduce((sum, job) => sum + job.sheetCount, 0)
 
   return (
     <Card className="overflow-hidden">
-      <div className="bg-muted/50 p-4 flex felx-row items-center justify-between">
-        <h2 className="text-xl font-semibold text-foreground">Scheduled Jobs: {jobs.length}</h2>
+      <div className="bg-muted/50 flex flex-row p-4 items-center justify-between ">
+        <h2 className="text-xl font-semibold text-foreground">Scheduled Jobs ({jobs.length})</h2>
         <div className="flex items-center justify-between">
-          <span className="font-semibold text-foreground">Total Sheets:</span>
-          <span className="ml-4 text-lg font-bold text-foreground">{totalSheets.toLocaleString()}</span>
+          <span className="font-semibold text-foreground">{isPasting ? "Total Quantity" : "Total Sheets"}:</span>
+          <span className="ml-4 text-lg font-bold text-foreground">{totalQuantity.toLocaleString()}</span>
         </div>
       </div>
       <div className="overflow-x-auto">
@@ -42,7 +43,8 @@ export function JobsTable({ jobs, onRemoveJob }: JobsTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Job Name</TableHead>
-              <TableHead className="text-right">Sheet Count</TableHead>
+              {isPasting && <TableHead className="text-right">Type</TableHead>}
+              <TableHead className="text-right">{isPasting ? "Quantity" : "Sheet Count"}</TableHead>
               <TableHead className="text-right">MR Time</TableHead>
               <TableHead className="text-right">Production</TableHead>
               <TableHead className="text-right">Total Time</TableHead>
@@ -53,6 +55,11 @@ export function JobsTable({ jobs, onRemoveJob }: JobsTableProps) {
             {jobs.map((job) => (
               <TableRow key={job.id}>
                 <TableCell className="font-medium">{job.name}</TableCell>
+                {isPasting && (
+                  <TableCell className="text-right text-sm capitalize">
+                    {job.pastingSubType === "side" ? "Side" : "Bottom"}
+                  </TableCell>
+                )}
                 <TableCell className="text-right font-mono">{job.sheetCount.toLocaleString()}</TableCell>
                 <TableCell className="text-right font-mono">{job.totalMR.toFixed(1)} min</TableCell>
                 <TableCell className="text-right font-mono">{job.productionTime.toFixed(1)} min</TableCell>

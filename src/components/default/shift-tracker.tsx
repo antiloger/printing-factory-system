@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { AlertCircle, CheckCircle2, Clock, Trash2, FileText } from "lucide-react" // Added FileText icon
+import { AlertCircle, CheckCircle2, Clock, Trash2, FileText } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,8 +21,9 @@ interface ShiftTrackerProps {
   setupTime: number
   shiftDuration: number
   jobCount: number
-  totalSheetCount: number // Added totalSheetCount prop
+  totalSheetCount: number
   onClearShift: () => void
+  isPasting?: boolean
 }
 
 export function ShiftTracker({
@@ -31,12 +32,19 @@ export function ShiftTracker({
   setupTime,
   shiftDuration,
   jobCount,
-  totalSheetCount, // Destructure totalSheetCount
+  totalSheetCount,
   onClearShift,
+  isPasting = false,
 }: ShiftTrackerProps) {
   const usedTime = setupTime + totalJobsTime
   const utilizationPercentage = (usedTime / shiftDuration) * 100
   const isOverCapacity = remainingShiftTime < 0
+
+  const getProgressColor = () => {
+    if (isOverCapacity) return "bg-destructive"
+    if (utilizationPercentage > 90) return "bg-warning"
+    return "bg-success"
+  }
 
   return (
     <Card className="overflow-hidden">
@@ -71,8 +79,6 @@ export function ShiftTracker({
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {" "}
-          {/* Changed to 5 columns */}
           <div className="rounded-lg bg-card p-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
@@ -102,7 +108,7 @@ export function ShiftTracker({
           <div className="rounded-lg bg-card p-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <FileText className="h-4 w-4" />
-              Total Sheets
+              {isPasting ? "Total Quantity" : "Total Sheets"}
             </div>
             <p className="mt-2 text-2xl font-bold text-foreground">{totalSheetCount.toLocaleString()}</p>
             <p className="text-xs text-muted-foreground">
@@ -143,6 +149,12 @@ export function ShiftTracker({
           <div className="mb-2 flex items-center justify-between text-sm">
             <span className="font-medium text-foreground">Shift Utilization</span>
             <span className="font-mono font-semibold text-foreground">{utilizationPercentage.toFixed(1)}%</span>
+          </div>
+          <div className={`h-3 w-full overflow-hidden rounded-full bg-muted ${getProgressColor()}`}>
+            <div
+              className={`h-full ${getProgressColor()} transition-all`}
+              style={{ width: `${Math.min(utilizationPercentage, 100)}%` }}
+            />
           </div>
           {isOverCapacity && (
             <p className="mt-2 text-sm text-destructive">

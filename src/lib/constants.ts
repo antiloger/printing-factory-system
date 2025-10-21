@@ -3,6 +3,7 @@ export const SHIFT_DURATION = 660 // minutes
 
 export const SETUP_TIME_OFFSET = 20 // minutes (constant per shift for Off-set)
 export const SETUP_TIME_DIECUT = 15 // minutes (constant per shift for Die-cut)
+export const SETUP_TIME_PASTING = 90 // minutes (constant per shift for Pasting)
 
 // Off-set Configuration
 export const PLATE_SETUP_TIME_PER_PLATE = 8 // minutes per plate
@@ -72,4 +73,64 @@ export function calculateDiecutStriping(count: number): number {
 
 export function getDiecutRunLengthRange(count: number) {
   return DIECUT_RUN_LENGTH_RANGES.find((range) => count >= range.min && count <= range.max)
+}
+
+// Side Pasting Configuration
+export const SIDE_PASTING_SIZE_RANGES = [
+  { label: "170mm - 600mm", value: "170-600", time: 30 },
+  { label: "600mm - 1000mm", value: "600-1000", time: 60 },
+] as const
+
+export const SIDE_PASTING_B_TO_S_TIME = 45 // minutes
+
+export const SIDE_PASTING_TYPES = [
+  { label: "Box", value: "box" },
+  { label: "Parcel", value: "parcel" },
+] as const
+
+export const SIDE_PASTING_SIZE_RANGES_QUANTITY = [
+  { label: "less 200mm", value: "less-200", min: 0, max: 200 },
+  { label: "200mm - 400mm", value: "200-400", min: 200, max: 400 },
+  { label: "400mm - 600mm", value: "400-600", min: 400, max: 600 },
+  { label: "600mm - 1000mm", value: "600-1000", min: 600, max: 1000 },
+] as const
+
+// Side Pasting quantity per hour table
+export const SIDE_PASTING_RATES: Record<string, Record<string, number>> = {
+  box: {
+    "less-200": 45000,
+    "200-400": 25000,
+    "400-600": 20000,
+    "600-1000": 15000,
+  },
+  parcel: {
+    "less-200": 35000,
+    "200-400": 20000,
+    "400-600": 20000,
+    "600-1000": 10000,
+  },
+}
+
+// Bottom Pasting Configuration
+export const BOTTOM_PASTING_SIZE_RANGES = [
+  { label: "400mm - 600mm", value: "400-600", time: 90 },
+  { label: "600mm - 1100mm", value: "600-1100", time: 180 },
+] as const
+
+export const BOTTOM_PASTING_B_TO_S_TIME = 45 // minutes
+
+export const BOTTOM_PASTING_SIZE_RANGES_QUANTITY = [
+  { label: "300mm - 600mm", value: "300-600", min: 300, max: 600 },
+  { label: "600mm - 1100mm", value: "600-1100", min: 600, max: 1100 },
+] as const
+
+// Bottom Pasting quantity per hour table
+export const BOTTOM_PASTING_RATES: Record<string, number> = {
+  "300-600": 10000,
+  "600-1100": 6000,
+}
+
+// Helper function to calculate production time for pasting
+export function calculatePastingProductionTime(quantity: number, ratePerHour: number): number {
+  return (quantity / ratePerHour) * 60 // Convert hours to minutes
 }
