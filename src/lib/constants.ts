@@ -45,7 +45,7 @@ export const DIECUT_MR_SHEETS_TIME = 15 // minutes
 // Die-cut Striping Configuration
 export const DIECUT_STRIPING_RANGES = [
   { min: 1, max: 40, multiplier: 1.5 },
-  { min: 41, max: 80, multiplier: 1.15 },
+  { min: 41, max: 90, multiplier: 1.15 },
 ] as const
 
 // Die-cut Run Length Configuration

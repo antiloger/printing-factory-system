@@ -104,17 +104,17 @@ export function PastingJobForm({ onAddJob, remainingShiftTime }: PastingJobFormP
       return
     }
 
-    if (pastingType === "side") {
-      if (!sideSizeRange || !sideType || !sideQuantitySizeRange || !sideQuantity) {
-        alert("Please fill in all required fields")
-        return
-      }
-    } else {
-      if (!bottomSizeRange || !bottomQuantitySizeRange || !bottomQuantity) {
-        alert("Please fill in all required fields")
-        return
-      }
-    }
+    // if (pastingType === "side") {
+    //   if (!sideSizeRange || !sideType || !sideQuantitySizeRange || !sideQuantity) {
+    //     alert("Please fill in all required fields")
+    //     return
+    //   }
+    // } else {
+    //   if (!bottomSizeRange || !bottomQuantitySizeRange || !bottomQuantity) {
+    //     alert("Please fill in all required fields")
+    //     return
+    //   }
+    // }
 
     if (totalJobTime > remainingShiftTime) {
       setShowWarning(true)

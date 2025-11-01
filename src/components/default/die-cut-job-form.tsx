@@ -276,7 +276,7 @@ export function DieCutJobForm({ onAddJob, remainingShiftTime, editingJob, onCanc
               Time: {stripingTime.toFixed(1)} minutes
               {Number(stripingCount) <= 40
                 ? ` (${stripingCount} × 1.5)`
-                : Number(stripingCount) <= 80
+                : Number(stripingCount) <= 90
                   ? ` (${stripingCount} × 1.15)`
                   : " (out of range)"}
             </p>
