@@ -89,8 +89,8 @@ export const SIDE_PASTING_TYPES = [
 ] as const
 
 export const SIDE_PASTING_SIZE_RANGES_QUANTITY = [
-  { label: "less 200mm", value: "less-200", min: 0, max: 200 },
-  { label: "200mm - 400mm", value: "200-400", min: 200, max: 400 },
+  { label: "less 250mm", value: "less-250", min: 0, max: 250 },
+  { label: "250mm - 400mm", value: "200-400", min: 250, max: 400 },
   { label: "400mm - 600mm", value: "400-600", min: 400, max: 600 },
   { label: "600mm - 1000mm", value: "600-1000", min: 600, max: 1000 },
 ] as const
@@ -98,13 +98,13 @@ export const SIDE_PASTING_SIZE_RANGES_QUANTITY = [
 // Side Pasting quantity per hour table
 export const SIDE_PASTING_RATES: Record<string, Record<string, number>> = {
   box: {
-    "less-200": 45000,
+    "less-250": 50000,
     "200-400": 25000,
     "400-600": 20000,
     "600-1000": 15000,
   },
   parcel: {
-    "less-200": 35000,
+    "less-200": 40000,
     "200-400": 20000,
     "400-600": 20000,
     "600-1000": 10000,
