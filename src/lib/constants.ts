@@ -104,7 +104,7 @@ export const SIDE_PASTING_RATES: Record<string, Record<string, number>> = {
     "600-1000": 15000,
   },
   parcel: {
-    "less-200": 40000,
+    "less-250": 30000,
     "200-400": 20000,
     "400-600": 20000,
     "600-1000": 10000,
