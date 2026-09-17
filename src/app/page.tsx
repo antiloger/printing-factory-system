@@ -30,6 +30,7 @@ export default function PrintingFactoryPage() {
   const [dieCutJobs, setDieCutJobs] = useState<Job[]>([])
   const [pastingJobs, setPastingJobs] = useState<Job[]>([])
   const [activeTab, setActiveTab] = useState("offset")
+  const [shiftDuration, setShiftDuration] = useState<number>(SHIFT_DURATION)
 
   const currentJobs = activeTab === "offset" ? offsetJobs : activeTab === "die-cut" ? dieCutJobs : pastingJobs
   const setupTime =
@@ -37,7 +38,7 @@ export default function PrintingFactoryPage() {
 
   const totalJobsTime = currentJobs.reduce((sum, job) => sum + job.totalJobTime, 0)
   const totalSheetCount = currentJobs.reduce((sum, job) => sum + job.sheetCount, 0)
-  const remainingShiftTime = SHIFT_DURATION - setupTime - totalJobsTime
+  const remainingShiftTime = shiftDuration - setupTime - totalJobsTime
 
   const handleAddJob = (job: Omit<Job, "id">) => {
     const newJob = {
@@ -109,7 +110,8 @@ export default function PrintingFactoryPage() {
               totalJobsTime={totalJobsTime}
               remainingShiftTime={remainingShiftTime}
               setupTime={setupTime}
-              shiftDuration={SHIFT_DURATION}
+              shiftDuration={shiftDuration}
+              onShiftDurationChange={setShiftDuration}
               jobCount={currentJobs.length}
               totalSheetCount={totalSheetCount}
               onClearShift={handleClearShift}
@@ -132,7 +134,8 @@ export default function PrintingFactoryPage() {
               totalJobsTime={totalJobsTime}
               remainingShiftTime={remainingShiftTime}
               setupTime={setupTime}
-              shiftDuration={SHIFT_DURATION}
+              shiftDuration={shiftDuration}
+              onShiftDurationChange={setShiftDuration}
               jobCount={currentJobs.length}
               totalSheetCount={totalSheetCount}
               onClearShift={handleClearShift}
@@ -155,7 +158,8 @@ export default function PrintingFactoryPage() {
               totalJobsTime={totalJobsTime}
               remainingShiftTime={remainingShiftTime}
               setupTime={setupTime}
-              shiftDuration={SHIFT_DURATION}
+              shiftDuration={shiftDuration}
+              onShiftDurationChange={setShiftDuration}
               jobCount={currentJobs.length}
               totalSheetCount={totalSheetCount}
               onClearShift={handleClearShift}

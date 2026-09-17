@@ -1,7 +1,9 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { AlertCircle, CheckCircle2, Clock, Trash2, FileText } from "lucide-react"
 import {
   AlertDialog,
@@ -14,12 +16,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  SHIFT_DURATION_PRESETS,
+  MIN_SHIFT_DURATION,
+  MAX_SHIFT_DURATION,
+  formatShiftDuration,
+} from "@/lib/constants"
 
 interface ShiftTrackerProps {
   totalJobsTime: number
   remainingShiftTime: number
   setupTime: number
   shiftDuration: number
+  onShiftDurationChange: (minutes: number) => void
   jobCount: number
   totalSheetCount: number
   onClearShift: () => void
@@ -31,11 +40,47 @@ export function ShiftTracker({
   remainingShiftTime,
   setupTime,
   shiftDuration,
+  onShiftDurationChange,
   jobCount,
   totalSheetCount,
   onClearShift,
   isPasting = false,
 }: ShiftTrackerProps) {
+  const [isCustom, setIsCustom] = useState(
+    () => !SHIFT_DURATION_PRESETS.some((preset) => preset.value === shiftDuration),
+  )
+  const [customValue, setCustomValue] = useState(String(shiftDuration))
+
+  const handlePresetSelect = (minutes: number) => {
+    setIsCustom(false)
+    setCustomValue(String(minutes))
+    onShiftDurationChange(minutes)
+  }
+
+  const handleCustomSelect = () => {
+    setIsCustom(true)
+    setCustomValue(String(shiftDuration))
+  }
+
+  const handleCustomChange = (value: string) => {
+    setCustomValue(value)
+    const minutes = Number(value)
+    if (value !== "" && Number.isFinite(minutes) && minutes >= MIN_SHIFT_DURATION && minutes <= MAX_SHIFT_DURATION) {
+      onShiftDurationChange(minutes)
+    }
+  }
+
+  const handleCustomBlur = () => {
+    const minutes = Number(customValue)
+    if (customValue === "" || !Number.isFinite(minutes) || minutes < MIN_SHIFT_DURATION) {
+      setCustomValue(String(shiftDuration))
+      return
+    }
+    const clamped = Math.min(minutes, MAX_SHIFT_DURATION)
+    setCustomValue(String(clamped))
+    onShiftDurationChange(clamped)
+  }
+
   const usedTime = setupTime + totalJobsTime
   const utilizationPercentage = (usedTime / shiftDuration) * 100
   const isOverCapacity = remainingShiftTime < 0
@@ -49,10 +94,51 @@ export function ShiftTracker({
   return (
     <Card className="overflow-hidden">
       <div className="bg-accent p-6">
-        <div className="mb-6 flex items-start justify-between">
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-foreground">Shift Time Tracker</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Single shift duration: {shiftDuration} minutes</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Single shift duration: {shiftDuration} minutes ({formatShiftDuration(shiftDuration)})
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <div className="inline-flex rounded-md border border-border bg-card p-1">
+                {SHIFT_DURATION_PRESETS.map((preset) => (
+                  <Button
+                    key={preset.value}
+                    type="button"
+                    size="sm"
+                    variant={!isCustom && shiftDuration === preset.value ? "default" : "ghost"}
+                    onClick={() => handlePresetSelect(preset.value)}
+                  >
+                    {preset.label}
+                  </Button>
+                ))}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={isCustom ? "default" : "ghost"}
+                  onClick={handleCustomSelect}
+                >
+                  Custom
+                </Button>
+              </div>
+              {isCustom && (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    min={MIN_SHIFT_DURATION}
+                    max={MAX_SHIFT_DURATION}
+                    step={1}
+                    value={customValue}
+                    onChange={(e) => handleCustomChange(e.target.value)}
+                    onBlur={handleCustomBlur}
+                    className="h-8 w-28 bg-card"
+                    aria-label="Custom shift duration in minutes"
+                  />
+                  <span className="text-sm text-muted-foreground">min</span>
+                </div>
+              )}
+            </div>
           </div>
           {jobCount > 0 && (
             <AlertDialog>

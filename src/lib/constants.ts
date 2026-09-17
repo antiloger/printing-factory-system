@@ -1,5 +1,20 @@
 // Shift Configuration
-export const SHIFT_DURATION = 660 // minutes
+export const SHIFT_DURATION = 660 // minutes (default: 11 hours)
+
+export const SHIFT_DURATION_PRESETS = [
+  { label: "11h", value: 660 },
+  { label: "24h", value: 1440 },
+] as const
+
+export const MIN_SHIFT_DURATION = 1 // minutes
+export const MAX_SHIFT_DURATION = 1440 // minutes (24 hours)
+
+export function formatShiftDuration(minutes: number): string {
+  const hours = Math.floor(minutes / 60)
+  const mins = Math.round(minutes % 60)
+  if (hours === 0) return `${mins}m`
+  return mins === 0 ? `${hours}h` : `${hours}h ${mins}m`
+}
 
 export const SETUP_TIME_OFFSET = 20 // minutes (constant per shift for Off-set)
 export const SETUP_TIME_DIECUT = 15 // minutes (constant per shift for Die-cut)
